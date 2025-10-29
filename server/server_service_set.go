@@ -19,8 +19,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/awcullen/opcua/internal/pool"
 	"github.com/awcullen/opcua/ua"
-	"github.com/djherbis/buffer"
 	"github.com/google/uuid"
 )
 
@@ -583,8 +583,8 @@ func (srv *Server) handleActivateSession(ch *serverSecureChannel, requestid uint
 				}
 				return nil
 			}
-			plainBuf := buffer.NewPartitionAt(ch.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.bufferPool)
+			plainBuf := pool.NewPartition(ch.bufferPool)
+			cipherBuf := pool.NewPartition(ch.bufferPool)
 			cipherBuf.Write(cipherBytes)
 			cipherText := make([]byte, int32(len(srv.localPrivateKey.D.Bytes())))
 			for cipherBuf.Len() > 0 {
@@ -643,8 +643,8 @@ func (srv *Server) handleActivateSession(ch *serverSecureChannel, requestid uint
 				}
 				return nil
 			}
-			plainBuf := buffer.NewPartitionAt(ch.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.bufferPool)
+			plainBuf := pool.NewPartition(ch.bufferPool)
+			cipherBuf := pool.NewPartition(ch.bufferPool)
 			cipherBuf.Write(cipherBytes)
 			cipherText := make([]byte, int32(len(srv.localPrivateKey.D.Bytes())))
 			for cipherBuf.Len() > 0 {
@@ -703,8 +703,8 @@ func (srv *Server) handleActivateSession(ch *serverSecureChannel, requestid uint
 				}
 				return nil
 			}
-			plainBuf := buffer.NewPartitionAt(ch.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.bufferPool)
+			plainBuf := pool.NewPartition(ch.bufferPool)
+			cipherBuf := pool.NewPartition(ch.bufferPool)
 			cipherBuf.Write(cipherBytes)
 			cipherText := make([]byte, int32(len(srv.localPrivateKey.D.Bytes())))
 			for cipherBuf.Len() > 0 {

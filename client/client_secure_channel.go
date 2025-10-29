@@ -27,8 +27,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/awcullen/opcua/internal/pool"
 	"github.com/awcullen/opcua/ua"
-	"github.com/djherbis/buffer"
 )
 
 const (
@@ -123,7 +123,7 @@ type clientSecureChannel struct {
 	symEncryptingBlockCipher   cipher.Block
 	symDecryptingBlockCipher   cipher.Block
 	bytesPool                  sync.Pool
-	bufferPool                 buffer.PoolAt
+	bufferPool                 *pool.PartitionPool
 	trace                      bool
 }
 
@@ -183,7 +183,7 @@ func newClientSecureChannel(
 		maxResponseMessageSize:               maxMessageSize,
 		maxResponseChunkCount:                maxChunkCount,
 		bytesPool:                            sync.Pool{New: func() any { s := make([]byte, maxBufferSize); return &s }},
-		bufferPool:                           buffer.NewMemPoolAt(int64(maxBufferSize)),
+		bufferPool:                           pool.NewPartitionPool(int(maxBufferSize)),
 		trace:                                trace,
 	}
 	if certs, err := x509.ParseCertificates(ch.remoteCertificate); err == nil && len(certs) > 0 {
@@ -547,7 +547,7 @@ func (ch *clientSecureChannel) sendRequest(ctx context.Context, op *ua.ServiceOp
 
 // sendOpenSecureChannelRequest sends open secure channel service request on transport channel.
 func (ch *clientSecureChannel) sendOpenSecureChannelRequest(ctx context.Context, request *ua.OpenSecureChannelRequest) error {
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 
 	var sendBuffer = *(ch.bytesPool.Get().(*[]byte))
@@ -742,7 +742,7 @@ func (ch *clientSecureChannel) sendOpenSecureChannelRequest(ctx context.Context,
 
 // sendCloseSecureChannelRequest sends the close secure channel request on transport channel.
 func (ch *clientSecureChannel) sendCloseSecureChannelRequest(ctx context.Context, request ua.ServiceRequest) error {
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 
 	var sendBuffer = *(ch.bytesPool.Get().(*[]byte))
@@ -909,7 +909,7 @@ func (ch *clientSecureChannel) sendCloseSecureChannelRequest(ctx context.Context
 
 // sendServiceRequest sends the service request on transport channel.
 func (ch *clientSecureChannel) sendServiceRequest(ctx context.Context, request ua.ServiceRequest) error {
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 
 	var sendBuffer = *(ch.bytesPool.Get().(*[]byte))
@@ -1375,7 +1375,7 @@ func (ch *clientSecureChannel) readResponse() (ua.ServiceResponse, ua.StatusCode
 	var paddingSize int
 	signatureSize := ch.securityPolicy.SymSignatureSize()
 
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 
 	var receiveBuffer = *(ch.bytesPool.Get().(*[]byte))

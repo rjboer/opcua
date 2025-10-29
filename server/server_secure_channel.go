@@ -22,8 +22,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/awcullen/opcua/internal/pool"
 	"github.com/awcullen/opcua/ua"
-	"github.com/djherbis/buffer"
 )
 
 const (
@@ -79,7 +79,7 @@ type serverSecureChannel struct {
 	sendBuffer                  []byte
 	receiveBuffer               []byte
 	bytesPool                   sync.Pool
-	bufferPool                  buffer.PoolAt
+	bufferPool                  *pool.PartitionPool
 
 	symSignHMAC   hash.Hash
 	symVerifyHMAC hash.Hash
@@ -108,7 +108,7 @@ func newServerSecureChannel(srv *Server, conn net.Conn, trace bool) *serverSecur
 		maxRequestMessageSize: srv.maxMessageSize,
 		maxRequestChunkCount:  srv.maxChunkCount,
 		bytesPool:             sync.Pool{New: func() any { s := make([]byte, srv.maxBufferSize); return &s }},
-		bufferPool:            buffer.NewMemPoolAt(int64(srv.maxBufferSize)),
+		bufferPool:            pool.NewPartitionPool(int(srv.maxBufferSize)),
 		trace:                 trace,
 		channelID:             srv.getNextChannelID(),
 		securityPolicyURI:     ua.SecurityPolicyURINone,
@@ -432,7 +432,7 @@ func (ch *serverSecureChannel) Write(res ua.ServiceResponse, id uint32) error {
 func (ch *serverSecureChannel) sendOpenSecureChannelResponse(res *ua.OpenSecureChannelResponse, id uint32) error {
 	ch.sendingSemaphore.Lock()
 	defer ch.sendingSemaphore.Unlock()
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 	var bodyEncoder = ua.NewBinaryEncoder(bodyStream, ch)
 
@@ -619,7 +619,7 @@ func (ch *serverSecureChannel) sendOpenSecureChannelResponse(res *ua.OpenSecureC
 func (ch *serverSecureChannel) sendServiceResponse(response ua.ServiceResponse, id uint32) error {
 	ch.sendingSemaphore.Lock()
 	defer ch.sendingSemaphore.Unlock()
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 	var bodyEncoder = ua.NewBinaryEncoder(bodyStream, ch)
 
@@ -1037,7 +1037,7 @@ func (ch *serverSecureChannel) readRequest() (ua.ServiceRequest, uint32, error) 
 	var channelID uint32
 	var newTokenID uint32
 
-	var bodyStream = buffer.NewPartitionAt(ch.bufferPool)
+	var bodyStream = pool.NewPartition(ch.bufferPool)
 	defer bodyStream.Reset()
 	var bodyDecoder = ua.NewBinaryDecoder(bodyStream, ch)
 

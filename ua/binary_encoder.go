@@ -12,7 +12,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/djherbis/buffer"
+	"github.com/awcullen/opcua/internal/pool"
 	"github.com/google/uuid"
 )
 
@@ -789,8 +789,8 @@ func (enc *BinaryEncoder) WriteExtensionObject(value ExtensionObject) error {
 	if err := enc.WriteByte(0x01); err != nil {
 		return BadEncodingError
 	}
-	// cast writer to BufferAt to access superpowers
-	if buf, ok := enc.w.(buffer.BufferAt); ok {
+	// cast writer to pooled partition to access superpowers
+	if buf, ok := enc.w.(pool.Partition); ok {
 		mark := buf.Len() // mark where length is written
 		bs := make([]byte, 4)
 		if _, err := buf.Write(bs); err != nil {
