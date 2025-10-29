@@ -15,8 +15,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/awcullen/opcua/internal/workerpool"
 	"github.com/awcullen/opcua/ua"
-	"github.com/gammazero/workerpool"
 )
 
 const (
@@ -71,7 +71,7 @@ type Server struct {
 	state                                ua.ServerState
 	secondsTillShutdown                  uint32
 	shutdownReason                       ua.LocalizedText
-	workerpool                           *workerpool.WorkerPool
+	workerpool                           *workerpool.Pool
 	sessionManager                       *SessionManager
 	subscriptionManager                  *SubscriptionManager
 	namespaceManager                     *NamespaceManager
@@ -217,7 +217,7 @@ func (srv *Server) RolePermissions() []ua.RolePermissionType {
 }
 
 // WorkerPool gets a pool of workers.
-func (srv *Server) WorkerPool() *workerpool.WorkerPool {
+func (srv *Server) WorkerPool() *workerpool.Pool {
 	srv.RLock()
 	defer srv.RUnlock()
 	return srv.workerpool
@@ -335,7 +335,7 @@ func (srv *Server) Close() error {
 			time.Sleep(time.Second)
 		}
 		srv.secondsTillShutdown = uint32(0)
-		
+
 	} else {
 		srv.state = ua.ServerStateShutdown
 		srv.Unlock()

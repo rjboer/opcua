@@ -1201,13 +1201,13 @@ func (srv *Server) handleBrowse(ch *serverSecureChannel, requestid uint32, req *
 	results := make([]ua.BrowseResult, l)
 
 	// handle requests in parallel using server thread pool.
-	wp := srv.WorkerPool()
+	pool := srv.WorkerPool()
 	wg := sync.WaitGroup{}
 	wg.Add(l)
 
 	for ii := 0; ii < l; ii++ {
 		i := ii
-		wp.Submit(func() {
+		job := func() {
 			d := req.NodesToBrowse[i]
 			if d.BrowseDirection < ua.BrowseDirectionForward || d.BrowseDirection > ua.BrowseDirectionBoth {
 				results[i] = ua.BrowseResult{StatusCode: ua.BadBrowseDirectionInvalid}
@@ -1330,7 +1330,10 @@ func (srv *Server) handleBrowse(ch *serverSecureChannel, requestid uint32, req *
 				References: rds,
 			}
 			wg.Done()
-		})
+		}
+		if err := pool.Submit(job); err != nil {
+			job()
+		}
 	}
 
 	// wait until all tasks are done
@@ -1465,13 +1468,13 @@ func (srv *Server) handleBrowseNext(ch *serverSecureChannel, requestid uint32, r
 	results := make([]ua.BrowseResult, l)
 
 	// handle requests in parallel using server thread pool.
-	wp := srv.WorkerPool()
+	pool := srv.WorkerPool()
 	wg := sync.WaitGroup{}
 	wg.Add(l)
 
 	for ii := 0; ii < l; ii++ {
 		i := ii
-		wp.Submit(func() {
+		job := func() {
 			cp := req.ContinuationPoints[i]
 			if len(cp) == 0 {
 				results[i] = ua.BrowseResult{
@@ -1515,7 +1518,10 @@ func (srv *Server) handleBrowseNext(ch *serverSecureChannel, requestid uint32, r
 				References: rds,
 			}
 			wg.Done()
-		})
+		}
+		if err := pool.Submit(job); err != nil {
+			job()
+		}
 	}
 
 	// wait until all tasks are done
@@ -1650,13 +1656,13 @@ func (srv *Server) handleTranslateBrowsePathsToNodeIds(ch *serverSecureChannel, 
 	results := make([]ua.BrowsePathResult, l)
 
 	// handle requests in parallel using server thread pool.
-	wp := srv.WorkerPool()
+	pool := srv.WorkerPool()
 	wg := sync.WaitGroup{}
 	wg.Add(l)
 
 	for ii := 0; ii < l; ii++ {
 		i := ii
-		wp.Submit(func() {
+		job := func() {
 			d := req.BrowsePaths[i]
 			if len(d.RelativePath.Elements) == 0 {
 				results[i] = ua.BrowsePathResult{StatusCode: ua.BadNothingToDo, Targets: []ua.BrowsePathTarget{}}
@@ -1698,7 +1704,10 @@ func (srv *Server) handleTranslateBrowsePathsToNodeIds(ch *serverSecureChannel, 
 			}
 			results[i] = ua.BrowsePathResult{StatusCode: ua.BadNoMatch, Targets: []ua.BrowsePathTarget{}}
 			wg.Done()
-		})
+		}
+		if err := pool.Submit(job); err != nil {
+			job()
+		}
 	}
 
 	// wait until all tasks are done
@@ -2208,17 +2217,20 @@ func (srv *Server) handleRead(ch *serverSecureChannel, requestid uint32, req *ua
 	}
 
 	results := make([]ua.DataValue, l)
-	wp := srv.WorkerPool()
+	pool := srv.WorkerPool()
 	wg := sync.WaitGroup{}
 	wg.Add(l)
 
 	for ii := 0; ii < l; ii++ {
 		i := ii
-		wp.Submit(func() {
+		job := func() {
 			n := req.NodesToRead[i]
 			results[i] = srv.readValue(session, n)
 			wg.Done()
-		})
+		}
+		if err := pool.Submit(job); err != nil {
+			job()
+		}
 	}
 
 	// wait until all tasks are done
@@ -2356,17 +2368,20 @@ func (srv *Server) handleWrite(ch *serverSecureChannel, requestid uint32, req *u
 	results := make([]ua.StatusCode, l)
 
 	// handle requests in parallel using server thread pool.
-	wp := srv.WorkerPool()
+	pool := srv.WorkerPool()
 	wg := sync.WaitGroup{}
 	wg.Add(l)
 
 	for ii := 0; ii < l; ii++ {
 		i := ii
-		wp.Submit(func() {
+		job := func() {
 			n := req.NodesToWrite[i]
 			results[i] = srv.writeValue(session, n)
 			wg.Done()
-		})
+		}
+		if err := pool.Submit(job); err != nil {
+			job()
+		}
 	}
 
 	// wait until all tasks are done
@@ -3608,13 +3623,13 @@ func (srv *Server) handleCall(ch *serverSecureChannel, requestid uint32, req *ua
 	results := make([]ua.CallMethodResult, l)
 
 	// handle requests in parallel using server thread pool.
-	wp := srv.WorkerPool()
+	pool := srv.WorkerPool()
 	wg := sync.WaitGroup{}
 	wg.Add(l)
 
 	for ii := 0; ii < l; ii++ {
 		i := ii
-		wp.Submit(func() {
+		job := func() {
 			n := req.MethodsToCall[i]
 			m := srv.NamespaceManager()
 			n1, ok := m.FindNode(n.ObjectID)
@@ -3665,7 +3680,10 @@ func (srv *Server) handleCall(ch *serverSecureChannel, requestid uint32, req *ua
 				results[i] = ua.CallMethodResult{StatusCode: ua.BadAttributeIDInvalid}
 			}
 			wg.Done()
-		})
+		}
+		if err := pool.Submit(job); err != nil {
+			job()
+		}
 	}
 
 	// wait until all tasks are done
