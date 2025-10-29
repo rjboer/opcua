@@ -16,8 +16,8 @@ import (
 	"os"
 	"sort"
 
+	"github.com/awcullen/opcua/internal/pool"
 	"github.com/awcullen/opcua/ua"
-	"github.com/djherbis/buffer"
 )
 
 var (
@@ -375,8 +375,8 @@ func (ch *Client) open(ctx context.Context) error {
 			if publickey == nil {
 				return ua.BadIdentityTokenRejected
 			}
-			plainBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
+			plainBuf := pool.NewPartition(ch.channel.bufferPool)
+			cipherBuf := pool.NewPartition(ch.channel.bufferPool)
 			binary.Write(plainBuf, binary.LittleEndian, uint32(len(ui.TokenData)+len(remoteNonce)))
 			plainBuf.Write([]byte(ui.TokenData))
 			plainBuf.Write(remoteNonce)
@@ -406,8 +406,8 @@ func (ch *Client) open(ctx context.Context) error {
 			if publickey == nil {
 				return ua.BadIdentityTokenRejected
 			}
-			plainBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
+			plainBuf := pool.NewPartition(ch.channel.bufferPool)
+			cipherBuf := pool.NewPartition(ch.channel.bufferPool)
 			binary.Write(plainBuf, binary.LittleEndian, uint32(len(ui.TokenData)+len(remoteNonce)))
 			plainBuf.Write([]byte(ui.TokenData))
 			plainBuf.Write(remoteNonce)
@@ -437,8 +437,8 @@ func (ch *Client) open(ctx context.Context) error {
 			if publickey == nil {
 				return ua.BadIdentityTokenRejected
 			}
-			plainBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
+			plainBuf := pool.NewPartition(ch.channel.bufferPool)
+			cipherBuf := pool.NewPartition(ch.channel.bufferPool)
 			binary.Write(plainBuf, binary.LittleEndian, uint32(len(ui.TokenData)+len(remoteNonce)))
 			plainBuf.Write([]byte(ui.TokenData))
 			plainBuf.Write(remoteNonce)
@@ -576,8 +576,8 @@ func (ch *Client) open(ctx context.Context) error {
 			if publickey == nil {
 				return ua.BadIdentityTokenRejected
 			}
-			plainBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
+			plainBuf := pool.NewPartition(ch.channel.bufferPool)
+			cipherBuf := pool.NewPartition(ch.channel.bufferPool)
 			binary.Write(plainBuf, binary.LittleEndian, uint32(len(passwordBytes)+len(remoteNonce)))
 			plainBuf.Write(passwordBytes)
 			plainBuf.Write(remoteNonce)
@@ -609,8 +609,8 @@ func (ch *Client) open(ctx context.Context) error {
 			if publickey == nil {
 				return ua.BadIdentityTokenRejected
 			}
-			plainBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
+			plainBuf := pool.NewPartition(ch.channel.bufferPool)
+			cipherBuf := pool.NewPartition(ch.channel.bufferPool)
 			binary.Write(plainBuf, binary.LittleEndian, uint32(len(passwordBytes)+len(remoteNonce)))
 			plainBuf.Write(passwordBytes)
 			plainBuf.Write(remoteNonce)
@@ -642,8 +642,8 @@ func (ch *Client) open(ctx context.Context) error {
 			if publickey == nil {
 				return ua.BadIdentityTokenRejected
 			}
-			plainBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
-			cipherBuf := buffer.NewPartitionAt(ch.channel.bufferPool)
+			plainBuf := pool.NewPartition(ch.channel.bufferPool)
+			cipherBuf := pool.NewPartition(ch.channel.bufferPool)
 			binary.Write(plainBuf, binary.LittleEndian, uint32(len(passwordBytes)+len(remoteNonce)))
 			plainBuf.Write(passwordBytes)
 			plainBuf.Write(remoteNonce)

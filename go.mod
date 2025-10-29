@@ -5,7 +5,6 @@ go 1.22.0
 toolchain go1.22.6
 
 require (
-	github.com/djherbis/buffer v1.2.0
 	github.com/gammazero/deque v1.0.0
 	github.com/gammazero/workerpool v1.1.3
 	github.com/google/uuid v1.6.0
