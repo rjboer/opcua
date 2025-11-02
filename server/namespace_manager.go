@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/awcullen/opcua/server/internal/queue"
 	"github.com/awcullen/opcua/ua"
-	"github.com/gammazero/deque"
 	"github.com/google/uuid"
 )
 
@@ -451,13 +451,13 @@ func (m *NamespaceManager) DeleteNode(node Node, deleteChildren bool) error {
 // GetSubTypes traverses the tree to get all target nodes with HasSubtype reference type.
 func (m *NamespaceManager) GetSubTypes(node Node) []Node {
 	children := []Node{}
-	queue := deque.Deque[Node]{}
-	queue.PushBack(node)
-	for queue.Len() > 0 {
-		node := queue.PopFront()
+	q := queue.Deque[Node]{}
+	q.PushBack(node)
+	for q.Len() > 0 {
+		node := q.PopFront()
 		for _, r := range node.References() {
 			if !r.IsInverse && r.ReferenceTypeID == ua.ReferenceTypeIDHasSubtype {
-				queue.PushBack(node)
+				q.PushBack(node)
 				children = append(children, node)
 			}
 		}
@@ -472,17 +472,17 @@ func (m *NamespaceManager) GetChildren(node Node, uris []string, withRefTypes []
 		Node    Node
 		Visited bool
 	}
-	queue := deque.Deque[queuedItem]{}
-	queue.PushBack(queuedItem{node, false})
-	for queue.Len() > 0 {
-		item := queue.PopFront()
+	q := queue.Deque[queuedItem]{}
+	q.PushBack(queuedItem{node, false})
+	for q.Len() > 0 {
+		item := q.PopFront()
 		if item.Visited {
 			continue
 		}
 		for _, r := range item.Node.References() {
 			if !r.IsInverse && (withRefTypes == nil || Contains(withRefTypes, r.ReferenceTypeID)) {
 				if target, ok := m.nodes[ua.ToNodeID(r.TargetID, uris)]; ok {
-					queue.PushBack(queuedItem{target, false})
+					q.PushBack(queuedItem{target, false})
 					children = append(children, target)
 				}
 			}

@@ -8,8 +8,8 @@ import (
 
 	"sync"
 
+	"github.com/awcullen/opcua/server/internal/queue"
 	"github.com/awcullen/opcua/ua"
-	deque "github.com/gammazero/deque"
 )
 
 // EventMonitoredItem specifies a node that is monitored for events.
@@ -22,7 +22,7 @@ type EventMonitoredItem struct {
 	samplingInterval float64
 	queueSize        uint32
 	discardOldest    bool
-	queue            deque.Deque[[]ua.Variant]
+	queue            queue.Deque[[]ua.Variant]
 	node             Node
 	eventFilter      ua.EventFilter
 	sub              *Subscription
@@ -42,7 +42,7 @@ func NewEventMonitoredItem(sub *Subscription, node Node, itemToMonitor ua.ReadVa
 		monitoringMode: monitoringMode,
 		clientHandle:   parameters.ClientHandle,
 		discardOldest:  parameters.DiscardOldest,
-		queue:          deque.Deque[[]ua.Variant]{},
+		queue:          queue.Deque[[]ua.Variant]{},
 	}
 	mi.setQueueSize(parameters.QueueSize)
 	mi.setSamplingInterval(parameters.SamplingInterval)

@@ -11,8 +11,8 @@ import (
 
 	"sync"
 
+	"github.com/awcullen/opcua/server/internal/queue"
 	"github.com/awcullen/opcua/ua"
-	deque "github.com/gammazero/deque"
 )
 
 // DataChangeMonitoredItem specifies the node and attribute that is monitored for data changes.
@@ -27,13 +27,13 @@ type DataChangeMonitoredItem struct {
 	discardOldest       bool
 	timestampsToReturn  ua.TimestampsToReturn
 	minSamplingInterval float64
-	queue               deque.Deque[ua.DataValue]
+	queue               queue.Deque[ua.DataValue]
 	node                Node
 	dataChangeFilter    ua.DataChangeFilter
 	previousQueuedValue ua.DataValue
 	sub                 *Subscription
 	srv                 *Server
-	prequeue            deque.Deque[ua.DataValue]
+	prequeue            queue.Deque[ua.DataValue]
 	ts                  time.Time
 	ti                  time.Duration
 	triggeredItems      []MonitoredItem
@@ -53,8 +53,8 @@ func NewDataChangeMonitoredItem(sub *Subscription, node Node, itemToMonitor ua.R
 		discardOldest:       parameters.DiscardOldest,
 		timestampsToReturn:  timestampsToReturn,
 		minSamplingInterval: minSamplingInterval,
-		queue:               deque.Deque[ua.DataValue]{},
-		prequeue:            deque.Deque[ua.DataValue]{},
+		queue:               queue.Deque[ua.DataValue]{},
+		prequeue:            queue.Deque[ua.DataValue]{},
 		previousQueuedValue: ua.NewDataValue(nil, ua.BadWaitingForInitialData, time.Time{}, 0, time.Time{}, 0),
 	}
 	mi.setQueueSize(parameters.QueueSize)
