@@ -1,6 +1,6 @@
 // Copyright 2021 Converter Systems LLC. All rights reserved.
 
-package client_test
+package examples
 
 import (
 	"context"
@@ -9,6 +9,11 @@ import (
 	"github.com/awcullen/opcua/client"
 	"github.com/awcullen/opcua/ua"
 )
+
+type CustomStruct struct {
+	W1 uint16
+	W2 uint16
+}
 
 // This example demonstrates reading the 'ServerStatus' variable.
 func ExampleClient_Read() {
