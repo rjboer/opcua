@@ -6,7 +6,7 @@ With this package, you can call any service of the OPC Unified Architecture, see
 ## Usage
 To connect to your OPC UA server, call client.Dial, passing the endpoint URL of the server and various security options. Dial returns a connected client or an error.
 
-For example, to connect to an OPC UA Demo Server, and read the server's status: 
+For example, to connect to an OPC UA Demo Server, and read the server's status. More runnable samples are available in the [`examples`](../examples) directory.
 
 ```go
 package client_test

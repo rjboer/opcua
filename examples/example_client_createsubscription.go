@@ -1,6 +1,6 @@
 // Copyright 2021 Converter Systems LLC. All rights reserved.
 
-package client_test
+package examples
 
 import (
 	"context"
@@ -48,8 +48,8 @@ func ExampleClient_CreateSubscription() {
 		TimestampsToReturn: ua.TimestampsToReturnBoth,
 		ItemsToCreate: []ua.MonitoredItemCreateRequest{
 			{
-				ItemToMonitor:  ua.ReadValueID{
-					NodeID: ua.VariableIDServerServerStatusCurrentTime, 
+				ItemToMonitor: ua.ReadValueID{
+					NodeID:      ua.VariableIDServerServerStatusCurrentTime,
 					AttributeID: ua.AttributeIDValue,
 				},
 				MonitoringMode: ua.MonitoringModeReporting,
