@@ -39,7 +39,7 @@ func NewSessionManager(server *Server) *SessionManager {
 func (m *SessionManager) Get(authenticationToken ua.NodeID) (*Session, bool) {
 	m.RLock()
 	defer m.RUnlock()
-	if s, ok := m.sessionsByToken[authenticationToken]; ok && !s.IsExpired(){
+	if s, ok := m.sessionsByToken[authenticationToken]; ok && !s.IsExpired() {
 		s.SetLastAccess(time.Now())
 		return s, ok
 	}
@@ -1712,7 +1712,6 @@ func (m *SessionManager) addDiagnosticsNode(s *Session) {
 }
 
 func (m *SessionManager) removeDiagnosticsNode(s *Session) {
-	if n, ok := m.server.NamespaceManager().FindNode(s.SessionId()); ok {
-		m.server.NamespaceManager().DeleteNode(n, true)
-	}
+	nm := m.server.NamespaceManager()
+	nm.DeleteNodes(s.SessionId())
 }

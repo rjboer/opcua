@@ -3887,7 +3887,7 @@ func (srv *Server) handleCreateMonitoredItems(ch *serverSecureChannel, requestid
 				continue
 			}
 			if dcf.DeadbandType != uint32(ua.DeadbandTypeNone) {
-				destType := srv.NamespaceManager().FindVariantType(n2.DataType())
+				destType, _ := srv.NamespaceManager().FindVariantType(n2.DataType())
 				switch destType {
 				case ua.VariantTypeByte, ua.VariantTypeSByte:
 				case ua.VariantTypeInt16, ua.VariantTypeInt32, ua.VariantTypeInt64:
@@ -4147,7 +4147,7 @@ func (srv *Server) handleModifyMonitoredItems(ch *serverSecureChannel, requestid
 					continue
 				}
 				if dcf.DeadbandType != uint32(ua.DeadbandTypeNone) {
-					destType := srv.NamespaceManager().FindVariantType(item.Node().(*VariableNode).DataType())
+					destType, _ := srv.NamespaceManager().FindVariantType(item.Node().(*VariableNode).DataType())
 					switch destType {
 					case ua.VariantTypeByte, ua.VariantTypeSByte:
 					case ua.VariantTypeInt16, ua.VariantTypeInt32, ua.VariantTypeInt64:
@@ -4749,7 +4749,7 @@ func (srv *Server) validateIndexRange(s string, dataType ua.NodeID, rank int32) 
 		}
 	}
 
-	destType := srv.NamespaceManager().FindVariantType(dataType)
+	destType, _ := srv.NamespaceManager().FindVariantType(dataType)
 
 	switch rank {
 	case ua.ValueRankScalarOrOneDimension:
@@ -5592,7 +5592,7 @@ func (srv *Server) writeValue(session *Session, writeValue ua.WriteValue) ua.Sta
 				return ua.BadUserAccessDenied
 			}
 			// check data type
-			destType := srv.NamespaceManager().FindVariantType(n1.DataType())
+			destType, _ := srv.NamespaceManager().FindVariantType(n1.DataType())
 			destRank := n1.ValueRank()
 			// special case convert bytestring to byte array
 			if destType == ua.VariantTypeByte && destRank == ua.ValueRankOneDimension {

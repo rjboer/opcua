@@ -335,7 +335,7 @@ func (srv *Server) Close() error {
 			time.Sleep(time.Second)
 		}
 		srv.secondsTillShutdown = uint32(0)
-		
+
 	} else {
 		srv.state = ua.ServerStateShutdown
 		srv.Unlock()
@@ -511,30 +511,19 @@ func (srv *Server) initializeNamespace() error {
 	if n, ok := nm.FindVariable(ua.VariableIDServerAuditing); ok {
 		n.SetValue(ua.NewDataValue(false, 0, time.Now(), 0, time.Now(), 0))
 	}
-	if n, ok := nm.FindNode(ua.MethodIDServerRequestServerStateChange); ok {
-		nm.DeleteNode(n, true)
-	}
-	if n, ok := nm.FindNode(ua.MethodIDServerSetSubscriptionDurable); ok {
-		nm.DeleteNode(n, true)
-	}
+	nm.DeleteNodes(ua.MethodIDServerRequestServerStateChange,
+		ua.MethodIDServerSetSubscriptionDurable)
+
 	if n, ok := nm.FindVariable(ua.VariableIDServerServiceLevel); ok {
 		n.SetValue(ua.NewDataValue(byte(255), 0, time.Now(), 0, time.Now(), 0))
 	}
 	if n, ok := nm.FindVariable(ua.VariableIDServerServerRedundancyRedundancySupport); ok {
 		n.SetValue(ua.NewDataValue(int32(0), 0, time.Now(), 0, time.Now(), 0))
 	}
-	if n, ok := nm.FindNode(ua.VariableIDServerServerRedundancyCurrentServerID); ok {
-		nm.DeleteNode(n, false)
-	}
-	if n, ok := nm.FindNode(ua.VariableIDServerServerRedundancyRedundantServerArray); ok {
-		nm.DeleteNode(n, true)
-	}
-	if n, ok := nm.FindNode(ua.VariableIDServerServerRedundancyServerNetworkGroups); ok {
-		nm.DeleteNode(n, true)
-	}
-	if n, ok := nm.FindNode(ua.VariableIDServerServerRedundancyServerURIArray); ok {
-		nm.DeleteNode(n, true)
-	}
+	nm.DeleteNodes(ua.VariableIDServerServerRedundancyCurrentServerID,
+		ua.VariableIDServerServerRedundancyRedundantServerArray,
+		ua.VariableIDServerServerRedundancyServerNetworkGroups,
+		ua.VariableIDServerServerRedundancyServerURIArray)
 
 	if n, ok := nm.FindVariable(ua.VariableIDServerNamespaceArray); ok {
 		n.SetReadValueHandler(func(session *Session, req ua.ReadValueID) ua.DataValue {
@@ -852,9 +841,7 @@ func (srv *Server) initializeNamespace() error {
 			return ua.NewDataValue(a, 0, time.Now(), 0, time.Now(), 0)
 		})
 	}
-	if n, ok := nm.FindNode(ua.VariableIDServerServerDiagnosticsSamplingIntervalDiagnosticsArray); ok {
-		nm.DeleteNode(n, true)
-	}
+	nm.DeleteNodes(ua.VariableIDServerServerDiagnosticsSamplingIntervalDiagnosticsArray)
 
 	if n, ok := nm.FindMethod(ua.MethodIDServerGetMonitoredItems); ok {
 		n.SetCallMethodHandler(func(session *Session, req ua.CallMethodRequest) ua.CallMethodResult {
